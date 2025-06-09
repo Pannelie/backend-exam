@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validateAuthBody } from "../middlewares/validators.js";
-import { getUser, registerUser } from "../services/users.js";
+import { getUser, registerUser, verifyPassword } from "../services/users.js";
 import { v4 as uuid } from "uuid";
 import jwt from "jsonwebtoken";
 
@@ -40,7 +40,9 @@ router.post("/login", validateAuthBody, async (req, res) => {
   const { username, password } = req.body;
   const user = await getUser(username);
   if (user) {
-    if (user.password === password) {
+    const isPasswordCorrect = await verifyPassword(password, user.password);
+
+    if (isPasswordCorrect) {
       const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, {
         expiresIn: "2h",
       });
