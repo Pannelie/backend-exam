@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createMenuItem, getMenu, updateProduct } from "../services/menu.js";
+import { createMenuItem, getMenu, removeProduct, updateProduct } from "../services/menu.js";
 import { adminMiddleware } from "../middlewares/auth/authorizeAdmin.js";
 import { authenticate } from "../middlewares/auth/authenticate.js";
 
@@ -49,6 +49,20 @@ router.put("/:prodId", authenticate, adminMiddleware, async (req, res, next) => 
     return res.status(200).json({ success: true, updatedProduct });
   } else {
     return next({ status: 500, message: `Failed to update product` });
+  }
+});
+
+router.delete("/:prodId", authenticate, adminMiddleware, async (req, res, next) => {
+  const { prodId } = req.params;
+  if (!prodId) {
+    return next({ status: 400, message: `Missing product ID` });
+  }
+
+  const removedProduct = await removeProduct({ prodId });
+  if (removedProduct) {
+    return res.status(200).json({ success: true, message: `Product ${prodId} removed`, removedProduct });
+  } else {
+    return next({ status: 404, message: `No product found with product ID ${prodId}` });
   }
 });
 
