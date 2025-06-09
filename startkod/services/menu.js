@@ -47,3 +47,13 @@ export async function updateProduct({ prodId, title, desc, price }) {
     return null;
   }
 }
+
+export async function removeProduct({ prodId }) {
+  try {
+    const removedProduct = await Product.findOneAndDelete({ prodId: prodId });
+    return removedProduct;
+  } catch (error) {
+    console.log(error.message);
+    return null;
+  }
+}
