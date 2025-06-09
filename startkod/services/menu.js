@@ -1,4 +1,5 @@
 import Product from "../models/product.js";
+import { generateProdId } from "../utils/index.js";
 
 export async function getMenu() {
   try {
@@ -21,7 +22,7 @@ export async function getProduct(prodId) {
 }
 
 export async function createMenuItem({ title, desc, price }) {
-  const prodId = Math.random().toString(36).substring(2, 8);
+  const prodId = generateProdId();
 
   try {
     const newProduct = await Product.create({
