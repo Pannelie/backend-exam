@@ -30,7 +30,7 @@ router.post("/", async (req, res, next) => {
   if (newProduct) {
     res.status(201).json(newProduct);
   } else {
-    next({ status: 500, message: `Error while creating product` });
+    return next({ status: 500, message: `Error while creating product` });
   }
 });
 
