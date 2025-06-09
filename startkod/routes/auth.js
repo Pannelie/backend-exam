@@ -7,23 +7,15 @@ import jwt from "jsonwebtoken";
 const router = Router();
 
 router.get("/logout", (req, res, next) => {
-  if (global.user) {
-    global.user = null;
-    res.json({
-      success: true,
-      message: "User logged out successfully",
-    });
-  } else {
-    next({
-      status: 400,
-      message: "No user is currently logged in",
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    message: "User logged out successfully",
+  });
 });
 
 router.post("/register", validateAuthBody, async (req, res) => {
-  const { username, password } = req.body;
-  const userType = "user";
+  const { username, password, role } = req.body;
+  const userType = role;
   const result = await registerUser({
     username: username,
     password: password,
@@ -34,6 +26,7 @@ router.post("/register", validateAuthBody, async (req, res) => {
     res.status(201).json({
       success: true,
       message: "New user registered successfully",
+      result,
     });
   } else {
     res.status(400).json({
@@ -49,13 +42,13 @@ router.post("/login", validateAuthBody, async (req, res) => {
   if (user) {
     if (user.password === password) {
       const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "2h",
       });
 
       res.json({
         success: true,
         message: "User logged in successfully",
-        token: token,
+        token,
       });
     } else {
       res.status(400).json({
