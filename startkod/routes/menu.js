@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { createMenuItem, getMenu } from "../services/menu.js";
 import { adminMiddleware } from "../middlewares/auth/authorizeAdmin.js";
+import { authenticate } from "../middlewares/auth/authenticate.js";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/", adminMiddleware, async (req, res, next) => {
+router.post("/", authenticate, adminMiddleware, async (req, res, next) => {
   const { title, desc, price } = req.body;
 
   if (!title || !desc || !price) {
