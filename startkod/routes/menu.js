@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { createMenuItem, getMenu } from "../services/menu.js";
+import { adminMiddleware } from "../middlewares/auth/authorizeAdmin.js";
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", adminMiddleware, async (req, res, next) => {
   const { title, desc, price } = req.body;
 
   if (!title || !desc || !price) {
@@ -30,7 +31,7 @@ router.post("/", async (req, res, next) => {
   if (newProduct) {
     res.status(201).json(newProduct);
   } else {
-    next({ status: 500, message: `Error while creating product` });
+    return next({ status: 500, message: `Error while creating product` });
   }
 });
 
