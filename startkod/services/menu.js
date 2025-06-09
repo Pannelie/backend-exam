@@ -37,3 +37,13 @@ export async function createMenuItem({ title, desc, price }) {
     return null;
   }
 }
+
+export async function updateProduct({ prodId, title, desc, price }) {
+  try {
+    const updatedProduct = await Product.findOneAndUpdate({ prodId: prodId }, { title, desc, price }, { new: true });
+    return updatedProduct;
+  } catch (error) {
+    console.log(error.message);
+    return null;
+  }
+}
