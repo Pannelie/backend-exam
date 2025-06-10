@@ -1,0 +1,5 @@
+info:
+  description: API Documentation for Airbean API
+  title: Airbean API
+  version: 1.0.0
+openapi: 3.0.1
