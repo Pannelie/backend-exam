@@ -3,6 +3,14 @@ info:
   title: Airbean API
   version: 1.0.0
 openapi: 3.0.1
+tags:
+  - name: Auth
+    description: Endpoints for login, logout and registration
+  - name: Menu
+    description: Endpoints for viewing and managing the product menu
+servers:
+  - url: http://localhost:8080
+    description: Local development server
 components:
   schemas:
     Product:
@@ -61,6 +69,32 @@ components:
               value:
                 success: false
                 message: "Missing product ID"
+    UnauthorizedError:
+      description: Unauthorized. No valid token provided or user not logged in
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: No user logged in
+    ForbiddenError:
+      description: Forbidden. The user does not have the required permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Access denied, only available for admin
     NotFoundError:
       description: Resource not found
       content:
@@ -80,7 +114,6 @@ components:
               value:
                 success: false
                 message: "No product found with product ID prod-xxxxx"
-
 paths:
   /api/auth/logout:
     get:
@@ -277,6 +310,10 @@ paths:
                   message:
                     type: string
                     example: "All fields required"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "500":
           description: Something went wrong while creating product for menu
           content:
@@ -337,7 +374,11 @@ paths:
                   message:
                     type: string
                     example: All fields required
-        '500':
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
           description: Server error. Could not update product
           content:
             application/json:
@@ -382,6 +423,9 @@ paths:
                     $ref: "#/components/schemas/Product"
         "400":
           $ref: "#/components/responses/BadRequestError"
-
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
         "404":
           $ref: "#/components/responses/NotFoundError"
