@@ -4,7 +4,11 @@ info:
   version: 1.0.0
 openapi: 3.0.1
 components:
-  schemas:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   responses:
     BadRequestError:
       description: Bad request from client
@@ -194,8 +198,84 @@ paths:
       tags:
         - Menu
       description:
-        Adds new product to menu
+        Adds new product to menu. Requires a valid token and admin access.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - price
+              properties:
+                title: 
+                  type: string
+                  example: "Bryggkaffe"
+                  description: The name for the product
+                description:
+                  type: string
+                  example: "Bryggd på månadens bönor"
+                  description: Description of the product
+                price:
+                  type: number
+                  example: 39
+                  description: The price of the product (in SEK)
       responses:
+        "201":
+          description: Product created and added to the menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  newProduct:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "665f8ddcab86f2d03a123456"
+                      title:
+                        type: string
+                        example: "Caffe Latte"
+                      description:
+                        type: string
+                        example: "Serveras varm"
+                      price:
+                        type: number
+                        example: 35
+        "400":
+          description: Missing field in request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "All fields required"
+        "500":
+          description: Something went wrong while creating product for menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Error while creating product
   /api/menu/{prodid}:
     put:
       tags:
