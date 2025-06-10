@@ -1,9 +1,41 @@
 info:
-  description: API Documentation for Airbean API
+  desc: API Documentation for Airbean API
   title: Airbean API
   version: 1.0.0
 openapi: 3.0.1
 components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        prodId:
+          type: string
+          example: "prod-xxxxx"
+        title:
+          type: string
+          example: "Caffe Latte"
+        desc:
+          type: string
+          example: "Serveras varm"
+        price:
+          type: number
+          example: 35
+    ProductInput:
+      type: object
+      required:
+        - title
+        - desc
+        - price
+      properties:
+        title:
+          type: string
+          example: "Caffe Latte"
+        desc:
+          type: string
+          example: "Serveras varm"
+        price:
+          type: number
+          example: 35
   securitySchemes:
     bearerAuth:
       type: http
@@ -11,7 +43,7 @@ components:
       bearerFormat: JWT
   responses:
     BadRequestError:
-      description: Bad request from client
+      desc: Bad request from client
       content:
         application/json:
           schema:
@@ -24,7 +56,7 @@ components:
                 type: string
                 example: Missing or invalid parameters in request
     NotFoundError:
-      description: Resource not found
+      desc: Resource not found
       content:
         application/json:
           schema:
@@ -42,11 +74,11 @@ paths:
     get:
       tags:
         - Auth
-      description:
+      desc:
         logout for user
       responses:
         "200":
-          description: User logged out successfully
+          desc: User logged out successfully
           content:
             application/json:
               schema:
@@ -62,7 +94,7 @@ paths:
     post:
       tags: 
         - Auth
-      description:
+      desc:
         login user
       requestBody:
         required: true
@@ -82,7 +114,7 @@ paths:
                   example: "secretPassword123"
       responses:
         "200":
-          description: Response for successfull login
+          desc: Response for successfull login
           content:
             application/json:
               schema:
@@ -98,7 +130,7 @@ paths:
                     type: string
                     example: "opJhbGciOiJIUzI1iksInR5cCI6IkpXVCJ5..."
         "400":
-          description: Login failed
+          desc: Login failed
           content:
             application/json:
               schema:
@@ -110,12 +142,12 @@ paths:
                   type: string
               examples:
                 IncorrectPassword:
-                  description: User entered incorrect username and/or password
+                  desc: User entered incorrect username and/or password
                   value: 
                     success: false
                     message: "Incorrect username and/or password"
                 UserNotFound:
-                  description: User not found
+                  desc: User not found
                   value:
                     success: false
                     message: "No user found"
@@ -123,7 +155,7 @@ paths:
     post:
       tags: 
         - Auth
-      description:
+      desc:
         User registration where either "user" or "admin" is set as role in request body
       requestBody:
         required: true
@@ -144,14 +176,14 @@ paths:
                   example: "secretPassword123"
                 role:
                   type: string
-                  description: Can only be user or admin
+                  desc: Can only be user or admin
                   enum: 
                     - user
                     - admin
                   example: "admin"
       responses:
         "201":
-          description: Response for successfull registration
+          desc: Response for successfull registration
           content:
             application/json:
               schema:
@@ -181,7 +213,7 @@ paths:
                         type: string
                         example: user-xxxxx
         "400":
-          description: registration failed
+          desc: registration failed
           content:
             application/json:
               schema:
@@ -197,7 +229,7 @@ paths:
     post:
       tags:
         - Menu
-      description:
+      desc:
         Adds new product to menu. Requires a valid token and admin access.
       security:
         - bearerAuth: []
@@ -206,27 +238,10 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - title
-                - description
-                - price
-              properties:
-                title: 
-                  type: string
-                  example: "Bryggkaffe"
-                  description: The name for the product
-                description:
-                  type: string
-                  example: "Bryggd på månadens bönor"
-                  description: Description of the product
-                price:
-                  type: number
-                  example: 39
-                  description: The price of the product (in SEK)
+              $ref: "#/components/schemas/ProductInput"
       responses:
         "201":
-          description: Product created and added to the menu
+          desc: Product created and added to the menu
           content:
             application/json:
               schema:
@@ -236,25 +251,9 @@ paths:
                     type: boolean
                     example: true
                   newProduct:
-                    type: object
-                    properties:
-                      prodId:
-                        type: string
-                        example: "prod-xxxxx"
-                      _id:
-                        type: string
-                        example: "665f8ddcab86f2d03a123456"
-                      title:
-                        type: string
-                        example: "Caffe Latte"
-                      description:
-                        type: string
-                        example: "Serveras varm"
-                      price:
-                        type: number
-                        example: 35
+                    $ref: "#/components/schemas/Product"
         "400":
-          description: Missing field in request body
+          desc: Missing field in request body
           content:
             application/json:
               schema:
@@ -267,7 +266,7 @@ paths:
                     type: string
                     example: "All fields required"
         "500":
-          description: Something went wrong while creating product for menu
+          desc: Something went wrong while creating product for menu
           content:
             application/json:
               schema:
@@ -283,7 +282,7 @@ paths:
     put:
       tags:
         - Menu
-      description:
+      desc:
         Updates product in menu. Requires admin access and token.
       security: 
         - bearerAuth: []
@@ -293,30 +292,16 @@ paths:
           required: true
           schema:
             type: string
-          description: ID of the product to Update
+          desc: ID of the product to Update
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - title
-                - desc
-                - price
-              properties:
-                title:
-                  type: string
-                  example: "Caramell Latte"
-                desc:
-                  type: string
-                  example: "Latte with a twist of caramell"
-                price:
-                  type: number
-                  example: 39
+              $ref: "#/components/schemas/ProductInput"
       responses:
         "200":
-          description: Product updated successfully
+          desc: Product updated successfully
           content:
             application/json:
               schema:
@@ -326,22 +311,9 @@ paths:
                     type: boolean
                     example: true
                   updatedProduct:
-                    type: object
-                    properties:
-                      prodId:
-                        type: string
-                        example: "prod-xxxxx"
-                      title:
-                        type: string
-                        example: "Caramell Latte"
-                      desc:
-                        type: string
-                        example: "Latte with a twist of caramell"
-                      price:
-                        type: number
-                        example: 35
+                    $ref: "#/components/schemas/Product"
         "400":
-          description: Missing fields in request
+          desc: Missing fields in request
           content:
             application/json:
               schema:
@@ -354,7 +326,7 @@ paths:
                     type: string
                     example: All fields required
         '500':
-          description: Server error. Could not update product
+          desc: Server error. Could not update product
           content:
             application/json:
               schema:
@@ -369,6 +341,6 @@ paths:
     delete:
       tags:
         - Menu
-      description:
+      desc:
         Deletes product in menu
       responses:
