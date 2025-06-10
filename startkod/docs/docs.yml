@@ -119,8 +119,7 @@ paths:
     get:
       tags:
         - Auth
-      description:
-        logout for user
+      description: logout for user
       responses:
         "200":
           description: User logged out successfully
@@ -200,8 +199,7 @@ paths:
     post:
       tags: 
         - Auth
-      description:
-        User registration where either "user" or "admin" is set as role in request body
+      description: User registration where either "user" or "admin" is set as role in request body
       requestBody:
         required: true
         content:
