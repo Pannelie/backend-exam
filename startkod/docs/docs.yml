@@ -4,6 +4,35 @@ info:
   version: 1.0.0
 openapi: 3.0.1
 components:
+  schemas:
+  responses:
+    badRequestError:
+      description: Bad request from client
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Missing or invalid parameters in request
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Requested resource not found
+
 paths:
   /api/auth/logout:
     get:
@@ -31,7 +60,42 @@ paths:
         - Auth
       description:
         login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "secretPassword123"
       responses:
+        "200":
+          description: Response for successfull login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  token:
+                    type: string
+                    example: "opJhbGciOiJIUzI1iksInR5cCI6IkpXVCJ5..."
+        "400":
+          $ref: "#/components/responses/NotFoundError"
+
   /api/auth/register:
     post:
       tags: 
