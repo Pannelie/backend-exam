@@ -27,7 +27,7 @@ export async function getUser(username) {
 
 export async function verifyPassword(inputPassword, hashedPassword) {
   try {
-    return awaitbcrypt.compare(inputPassword, hashedPassword);
+    return await bcrypt.compare(inputPassword, hashedPassword);
   } catch (error) {
     console.log(error.message);
     return false;

@@ -47,7 +47,7 @@ router.post("/login", validateAuthBody, async (req, res) => {
         expiresIn: "2h",
       });
 
-      res.json({
+      res.status(200).json({
         success: true,
         message: "User logged in successfully",
         token,

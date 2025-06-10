@@ -1,0 +1,429 @@
+info:
+  description: API Documentation for Airbean API
+  title: Airbean API
+  version: 1.0.0
+openapi: 3.0.1
+tags:
+  - name: Auth
+    description: Endpoints for login, logout and registration
+  - name: Menu
+    description: Endpoints for viewing and managing the product menu
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        prodId:
+          type: string
+          example: "prod-xxxxx"
+        title:
+          type: string
+          example: "Caffe Latte"
+        description:
+          type: string
+          example: "Serveras varm"
+        price:
+          type: number
+          example: 35
+    ProductInput:
+      type: object
+      required:
+        - title
+        - description
+        - price
+      properties:
+        title:
+          type: string
+          example: "Caffe Latte"
+        description:
+          type: string
+          example: "Serveras varm"
+        price:
+          type: number
+          example: 35
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequestError:
+      description: Bad request from client
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Missing product ID"
+          examples:
+            ProductMissing:
+              description: Missing product ID example
+              value:
+                success: false
+                message: "Missing product ID"
+    UnauthorizedError:
+      description: Unauthorized. No valid token provided or user not logged in
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: No user logged in
+    ForbiddenError:
+      description: Forbidden. The user does not have the required permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Access denied, only available for admin
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Requested resource not found
+          examples:
+            ProductNotFound:
+              description: Product not found example
+              value:
+                success: false
+                message: "No product found with product ID prod-xxxxx"
+paths:
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      description: logout for user
+      responses:
+        "200":
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged out successfully
+  /api/auth/login:
+    post:
+      tags: 
+        - Auth
+      description:
+        login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "secretPassword123"
+      responses:
+        "200":
+          description: Response for successfull login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  token:
+                    type: string
+                    example: "opJhbGciOiJIUzI1iksInR5cCI6IkpXVCJ5..."
+        "400":
+          description: Login failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                IncorrectPassword:
+                  description: User entered incorrect username and/or password
+                  value: 
+                    success: false
+                    message: "Incorrect username and/or password"
+                UserNotFound:
+                  description: User not found
+                  value:
+                    success: false
+                    message: "No user found"
+  /api/auth/register:
+    post:
+      tags: 
+        - Auth
+      description: User registration where either "user" or "admin" is set as role in request body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - role
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "secretPassword123"
+                role:
+                  type: string
+                  description: "Role can only be 'user' or 'admin'. Admins have elevated privileges."
+                  enum: 
+                    - user
+                    - admin
+                  example: "admin"
+      responses:
+        "201":
+          description: Response for successfull registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: New user registered successfully
+                  result:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: "user123"
+                        ##Password bör kanske inte inkluderas i verkligt scenario, 
+                        ##men inkluderar i denna uppgiften eftersom det följer med i body
+                      password:
+                        type: string
+                        example: "password123"
+                      role:
+                        type: string
+                        example: user
+                      userId:
+                        type: string
+                        example: user-xxxxx
+        "400":
+          description: registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Registration unsuccessful
+  /api/menu:
+    post:
+      tags:
+        - Menu
+      description:
+        Adds new product to menu. Requires a valid token and admin access.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created and added to the menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  newProduct:
+                    $ref: "#/components/schemas/Product"
+        "400":
+          description: Missing field in request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "All fields required"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          description: Something went wrong while creating product for menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Error while creating product
+  /api/menu/{prodId}:
+    put:
+      tags:
+        - Menu
+      description:
+        Updates product in menu. Requires admin access and token.
+      security: 
+        - bearerAuth: []
+      parameters: 
+        - name: prodId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the product to Update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  updatedProduct:
+                    $ref: "#/components/schemas/Product"
+        "400":
+          description: Missing fields in request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: 
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: All fields required
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          description: Server error. Could not update product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to update product
+    delete:
+      tags:
+        - Menu
+      description:
+        Deletes product in menu. Requires admin access and token.
+      security: 
+        - bearerAuth: []
+      parameters: 
+        - name: prodId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the product to Delete
+      responses:
+        "200":
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Product prod-xxxxx removed"
+                  removedProduct:
+                    $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"

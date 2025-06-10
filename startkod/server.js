@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import swaggerUI from "swagger-ui-express";
+import YAML from "yamljs";
 
 import authRouter from "./routes/auth.js";
 import menuRouter from "./routes/menu.js";
@@ -16,12 +18,14 @@ const app = express();
 const PORT = process.env.PORT;
 mongoose.connect(process.env.CONNECTION_STRING);
 const database = mongoose.connection;
+const swaggerDocs = YAML.load("./docs/docs.yml");
 
 // Middlewares
 app.use(express.json());
 app.use(logger);
 
 // Routes
+app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use("/api/auth", authRouter);
 app.use("/api/menu", menuRouter);
 app.use("/api/cart", cartRouter);
