@@ -6,7 +6,7 @@ openapi: 3.0.1
 components:
   schemas:
   responses:
-    badRequestError:
+    BadRequestError:
       description: Bad request from client
       content:
         application/json:
@@ -94,15 +94,101 @@ paths:
                     type: string
                     example: "opJhbGciOiJIUzI1iksInR5cCI6IkpXVCJ5..."
         "400":
-          $ref: "#/components/responses/NotFoundError"
-
+          description: Login failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                  type: string
+              examples:
+                IncorrectPassword:
+                  description: User entered incorrect username and/or password
+                  value: 
+                    success: false
+                    message: "Incorrect username and/or password"
+                UserNotFound:
+                  description: User not found
+                  value:
+                    success: false
+                    message: "No user found"
   /api/auth/register:
     post:
       tags: 
         - Auth
       description:
-        register user
+        User registration where either "user" or "admin" is set as role in request body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - role
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "secretPassword123"
+                role:
+                  type: string
+                  description: Can only be user or admin
+                  enum: 
+                    - user
+                    - admin
+                  example: "admin"
       responses:
+        "201":
+          description: Response for successfull registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: New user registered successfully
+                  result:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: "user123"
+                        ##Password bör kanske inte inkluderas i verkligt scenario, 
+                        ##men inkluderar i denna uppgiften eftersom det följer med i body
+                      password:
+                        type: string
+                        example: "password123"
+                      role:
+                        type: string
+                        example: user
+                      userId:
+                        type: string
+                        example: user-xxxxx
+        "400":
+          description: registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Registration unsuccessful
   /api/menu:
     post:
       tags:
