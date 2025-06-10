@@ -9,22 +9,53 @@ paths:
     get:
       tags:
         - Auth
+      description:
+        logout for user
+      responses:
+        "200":
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: User logged out successfully
   /api/auth/login:
     post:
       tags: 
         - Auth
+      description:
+        login user
+      responses:
   /api/auth/register:
     post:
       tags: 
         - Auth
+      description:
+        register user
+      responses:
   /api/menu:
     post:
       tags:
         - Menu
+      description:
+        Adds new product to menu
+      responses:
   /api/menu/{prodid}:
     put:
       tags:
         - Menu
+      description:
+        Updates product in menu
+      responses:
     delete:
       tags:
         - Menu
+      description:
+        Deletes product in menu
+      responses:
